@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Ease - Financial Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --forest-green: #2d4a3e;
+            --deep-forest: #1a2e23;
+            --parchment-yellow: #f4f1e8;
+            --soft-parchment: #faf8f3;
+            --charcoal-gray: #3a3a3a;
+            --light-charcoal: #5a5a5a;
+            --accent-gold: #b8860b;
+            --border-color: #d4c5a9;
+            --warning-red: #8b2635;
+            --success-green: #4a6741;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--soft-parchment) 0%, var(--parchment-yellow) 100%);
+            color: var(--charcoal-gray);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .app-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--deep-forest);
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .app-subtitle {
+            font-size: 0.9rem;
+            color: var(--light-charcoal);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .crest-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            background: var(--forest-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(45, 74, 62, 0.3);
+        }
+
+        .crest-icon::before {
+            content: "⚜";
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+        }
+
+        /* Screen Management */
+        .screen {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease-in-out;
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+            left: 0;
+            top: 0;
+        }
+
+        .screen.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+            position: relative;
+        }
+
+        .landing-screen.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Buttons */
+        .primary-button {
+            background: linear-gradient(135deg, var(--forest-green) 0%, var(--deep-forest) 100%);
+            color: var(--soft-parchment);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 74, 62, 0.3);
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 0 auto;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 74, 62, 0.4);
+        }
+
+        .secondary-button {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #9a7209 100%);
+            color: var(--soft-parchment);
+            border: none;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(184, 134, 11, 0.3);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .secondary-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(184, 134, 11, 0.4);
+        }
+
+        .danger-button {
+            background: linear-gradient(135deg, var(--warning-red) 0%, #6b1e2a 100%);
+            color: var(--soft-parchment);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 38, 53, 0.3);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .danger-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(139, 38, 53, 0.4);
+        }
+
+        /* Form Elements */
+        .form-container {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .form-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--deep-forest);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--charcoal-gray);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-field, .select-field {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            background: var(--soft-parchment);
+            color: var(--charcoal-gray);
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-field:focus, .select-field:focus {
+            outline: none;
+            border-color: var(--forest-green);
+            box-shadow: 0 0 0 3px rgba(45, 74, 62, 0.1);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--light-charcoal);
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+
+        .input-field.with-symbol {
+            padding-left: 2.5rem;
+        }
+
+        /* Budget Allocation */
+        .allocation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .allocation-item {
+            text-align: center;
+        }
+
+        .allocation-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--deep-forest);
+            margin-top: 0.5rem;
+        }
+
+        /* Daily View Layout */
+        .quota-display {
+            text-align: center;
+            background: var(--forest-green);
+            color: var(--soft-parchment);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 6px 20px rgba(45, 74, 62, 0.3);
+        }
+
+        .quota-amount {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .quota-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+
+        .budget-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .budget-card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .budget-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--deep-forest);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .budget-label {
+            font-size: 0.8rem;
+            color: var(--light-charcoal);
+            margin-top: 0.25rem;
+        }
+
+        /* Transaction Style Spending */
+        .spending-section {
+            margin-bottom: 2rem;
+        }
+
+        .transaction-form {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 243, 0.95) 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .transaction-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .spending-input {
+            flex: 1;
+        }
+
+        .category-row {
+            margin-bottom: 1rem;
+        }
+
+        .transfer-button {
+            background: linear-gradient(135deg, var(--success-green) 0%, #3d5a36 100%);
+            color: var(--soft-parchment);
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(74, 103, 65, 0.3);
+            white-space: nowrap;
+        }
+
+        .transfer-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(74, 103, 65, 0.4);
+        }
+
+        /* Spending Log */
+        .spending-log {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .spending-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .spending-entry:last-child {
+            border-bottom: none;
+        }
+
+        .entry-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .entry-category {
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            font-weight: 500;
+        }
+
+        .entry-time {
+            font-size: 0.75rem;
+            color: var(--light-charcoal);
+        }
+
+        .entry-amount {
+            font-weight: 600;
+            color: var(--charcoal-gray);
+        }
+
+        /* Messages */
+        .warning-message {
+            background: var(--warning-red);
+            color: var(--soft-parchment);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 500;
+            animation: pulse 2s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .success-message {
+            background: var(--success-green);
+            color: var(--soft-parchment);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-link a {
+            color: var(--forest-green);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: var(--deep-forest);
+            text-decoration: underline;
+        }
+
+        .day-controls {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--soft-parchment);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            margin: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.visible .modal {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: var(--warning-red);
+            margin-bottom: 1rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .modal-content {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: var(--charcoal-gray);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .modal-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .modal-cancel {
+            background: var(--light-charcoal);
+            color: white;
+        }
+
+        .modal-confirm {
+            background: var(--warning-red);
+            color: white;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 500px;
+                padding: 40px;
+            }
+
+            .app-title {
+                font-size: 3rem;
+            }
+
+            .form-container {
+                padding: 2.5rem;
+            }
+
+            .primary-button {
+                padding: 1.2rem 3rem;
+                font-size: 1.2rem;
+            }
+
+            .quota-amount {
+                font-size: 3rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 600px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .allocation-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .budget-info {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .transaction-row {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .modal {
+                margin: 10px;
+                padding: 1.5rem;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="landingScreen" class="screen landing-screen visible fade-in-up">
+            <div class="app-header">
+                <div class="crest-icon"></div>
+                <h1 class="app-title">Daily Ease</h1>
+                <p class="app-subtitle">Your path to financial wisdom</p>
+            </div>
+            
+            <button class="primary-button" onclick="showMainScreen()">
+                <i data-lucide="play" style="width: 20px; height: 20px;"></i>
+                Start Now
+            </button>
+        </div>
+
+        <div id="mainScreen" class="screen">
+            <div class="app-header">
+                <div class="crest-icon"></div>
+                <h1 class="app-title">Daily Ease</h1>
+            </div>
+
+            <div class="form-container">
+                <h2 class="form-title">
+                    <i data-lucide="coins" style="width: 24px; height: 24px;"></i>
+                    Enter Your Monthly Income
+                </h2>
+                
+                <div class="input-group">
+                    <label for="monthlyIncome" class="input-label">
+                        <i data-lucide="dollar-sign" style="width: 16px; height: 16px;"></i>
+                        Monthly Income Amount
+                    </label>
+                    <div class="input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input 
+                            type="number" 
+                            id="monthlyIncome" 
+                            class="input-field with-symbol" 
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-container" style="margin-bottom: 1.5rem;">
+                    <h3 class="form-title">
+                        <i data-lucide="pie-chart" style="width: 20px; height: 20px;"></i>
+                        Budget Allocation
+                    </h3>
+                    
+                    <div class="allocation-grid">
+                        <div class="allocation-item">
+                            <label for="savingsPercent" class="input-label">
+                                <i data-lucide="piggy-bank" style="width: 16px; height: 16px;"></i>
+                                Savings %
+                            </label>
+                            <input 
+                                type="number" 
+                                id="savingsPercent" 
+                                class="input-field" 
+                                value="30"
+                                min="0"
+                                max="100"
+                                onchange="updateAllocation()"
+                            >
+                            <div class="allocation-value" id="savingsAmount">$0.00</div>
+                        </div>
+                        
+                        <div class="allocation-item">
+                            <label for="spendingPercent" class="input-label">
+                                <i data-lucide="shopping-cart" style="width: 16px; height: 16px;"></i>
+                                Spending %
+                            </label>
+                            <input 
+                                type="number" 
+                                id="spendingPercent" 
+                                class="input-field" 
+                                value="70"
+                                min="0"
+                                max="100"
+                                onchange="updateAllocation()"
+                            >
+                            <div class="allocation-value" id="spendingAllocationAmount">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="primary-button" style="width: 100%;" onclick="calculateQuota()">
+                    <i data-lucide="calculator" style="width: 20px; height: 20px;"></i>
+                    Calculate Daily Quota
+                </button>
+            </div>
+
+            <div class="back-link">
+                <a href="#" onclick="showLandingScreen()">← Back to start</a>
+            </div>
+        </div>
+
+        <div id="dailyScreen" class="screen">
+            <div class="app-header">
+                <div class="crest-icon"></div>
+                <h1 class="app-title">Daily Ease</h1>
+            </div>
+
+            <div id="warningMessage" class="warning-message" style="display: none;">
+                <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
+                Daily Quota Exceeded! Fee applied to tomorrow's budget.
+            </div>
+
+            <div id="successMessage" class="success-message" style="display: none;">
+                <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+                Day completed successfully! Remaining balance carried forward.
+            </div>
+
+            <div class="quota-display">
+                <div class="quota-amount" id="dailyQuotaAmount">$0.00</div>
+                <div class="quota-label">Daily Spending Quota</div>
+            </div>
+
+            <div class="budget-info">
+                <div class="budget-card">
+                    <div class="budget-value" id="remainingBudget">$0.00</div>
+                    <div class="budget-label">Remaining Today</div>
+                </div>
+                <div class="budget-card">
+                    <div class="budget-value" id="totalSpent">$0.00</div>
+                    <div class="budget-label">Spent Today</div>
+                </div>
+            </div>
+
+            <div class="form-container spending-section">
+                <h3 class="form-title">
+                    <i data-lucide="credit-card" style="width: 20px; height: 20px;"></i>
+                    Process Transaction
+                </h3>
+                
+                <div class="transaction-form">
+                    <div class="category-row">
+                        <label for="spendingCategory" class="input-label">
+                            <i data-lucide="tag" style="width: 16px; height: 16px;"></i>
+                            Transaction Category
+                        </label>
+                        <select id="spendingCategory" class="select-field">
+                            <option value="food">🍽️ Food</option>
+                            <option value="transportation">🚗 Transportation</option>
+                            <option value="utilities">⚡ Utilities</option>
+                            <option value="miscellaneous">📦 Miscellaneous</option>
+                        </select>
+                    </div>
+                    
+                    <div class="transaction-row">
+                        <div class="input-wrapper spending-input">
+                            <span class="currency-symbol">$</span>
+                            <input 
+                                type="number" 
+                                id="spendingAmount" 
+                                class="input-field with-symbol" 
+                                placeholder="0.00"
+                                step="0.01"
+                                min="0"
+                            >
+                        </div>
+                        <button type="button" class="transfer-button" onclick="processTransaction()">
+                            <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+                            Transfer
+                        </button>
+                    </div>
+                </div>
+
+                <div class="spending-log" id="spendingLog">
+                    <p style="text-align: center; color: var(--light-charcoal); font-size: 0.9rem;">
+                        No spending logged today
+                    </p>
+                </div>
+            </div>
+
+            <div class="day-controls">
+                <button type="button" class="danger-button" onclick="endDay()">
+                    <i data-lucide="moon" style="width: 20px; height: 20px;"></i>
+                    End Day & Roll Over
+                </button>
+            </div>
+
+            <div class="back-link">
+                <a href="#" onclick="showMainScreen()">← Change income</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal">
+            <h3 class="modal-title">
+                <i data-lucide="alert-triangle" style="width: 24px; height: 24px;"></i>
+                Quota Exceeded Warning
+            </h3>
+            <div class="modal-content">
+                <p>This transaction will exceed your daily quota by <strong id="excessAmount">$0.00</strong>.</p>
+                <p>A fee of <strong>$20.00</strong> will be deducted from tomorrow's budget, reducing your available spending money.</p>
+                <p>Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-button modal-cancel" onclick="cancelTransaction()">Cancel</button>
+                <button class="modal-button modal-confirm" onclick="confirmTransaction()">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let appData = {
+            monthlyIncome: 0,
+            savingsPercent: 30,
+            spendingPercent: 70,
+            dailyQuota: 0,
+            totalSavings: 0,
+            totalMonthlySpending: 0,
+            currentDay: 1,
+            dailySpending: [],
+            remainingBudget: 0,
+            totalSpentToday: 0,
+            painfulFee: 20,
+            pendingTransaction: null
+        };
+
+        // Initialize app
+        function initApp() {
+            loadData();
+            updateAllocation();
+            updateDailyView();
+            lucide.createIcons();
+        }
+
+        // Data persistence
+        function saveData() {
+            localStorage.setItem('dailyEaseData', JSON.stringify(appData));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('dailyEaseData');
+            if (saved) {
+                appData = { ...appData, ...JSON.parse(saved) };
+            }
+        }
+
+        // Screen navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('visible');
+            });
+            
+            setTimeout(() => {
+                document.getElementById(screenId).classList.add('visible');
+            }, 300);
+        }
+
+        function showLandingScreen() {
+            showScreen('landingScreen');
+        }
+
+        function showMainScreen() {
+            showScreen('mainScreen');
+            setTimeout(() => {
+                document.getElementById('monthlyIncome').focus();
+                if (appData.monthlyIncome > 0) {
+                    document.getElementById('monthlyIncome').value = appData.monthlyIncome;
+                    document.getElementById('savingsPercent').value = appData.savingsPercent;
+                    document.getElementById('spendingPercent').value = appData.spendingPercent;
+                    updateAllocation();
+                }
+            }, 400);
+        }
+
+        function showDailyScreen() {
+            showScreen('dailyScreen');
+            updateDailyView();
+            setTimeout(() => {
+                document.getElementById('spendingAmount').focus();
+            }, 400);
+        }
+
+        // Budget allocation
+        function updateAllocation() {
+            const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
+            const savingsPercent = parseInt(document.getElementById('savingsPercent').value) || 0;
+            const spendingPercent = parseInt(document.getElementById('spendingPercent').value) || 0;
+            
+            // Ensure percentages sum to 100
+            if (savingsPercent + spendingPercent !== 100) {
+                document.getElementById('spendingPercent').value = 100 - savingsPercent;
+            }
+            
+            const savingsAmount = income * (savingsPercent / 100);
+            const spendingAmount = income * (spendingPercent / 100);
+            
+            document.getElementById('savingsAmount').textContent = `$${savingsAmount.toFixed(2)}`;
+            document.getElementById('spendingAllocationAmount').textContent = `$${spendingAmount.toFixed(2)}`;
+        }
+
+        // Core calculation logic
+        function calculateQuota() {
+            const incomeInput = document.getElementById('monthlyIncome');
+            const income = parseFloat(incomeInput.value);
+            const savingsPercent = parseInt(document.getElementById('savingsPercent').value);
+            const spendingPercent = parseInt(document.getElementById('spendingPercent').value);
+            
+            if (!income || income <= 0) {
+                incomeInput.classList.add('shake');
+                setTimeout(() => {
+                    incomeInput.classList.remove('shake');
+                }, 500);
+                return;
+            }
+
+            if (savingsPercent + spendingPercent !== 100) {
+                alert('Savings and spending percentages must sum to 100%');
+                return;
+            }
+
+            // Calculate allocations
+            appData.monthlyIncome = income;
+            appData.savingsPercent = savingsPercent;
+            appData.spendingPercent = spendingPercent;
+            appData.totalSavings = income * (savingsPercent / 100);
+            appData.totalMonthlySpending = income * (spendingPercent / 100);
+            appData.dailyQuota = appData.totalMonthlySpending / 30;
+            appData.remainingBudget = appData.dailyQuota;
+            appData.dailySpending = [];
+            appData.totalSpentToday = 0;
+
+            saveData();
+            showDailyScreen();
+        }
+
+        // Transaction processing - FIXED VERSION
+        function processTransaction() {
+            console.log('processTransaction called'); // Debug log
+    
+            const spendingInput = document.getElementById('spendingAmount');
+            const categorySelect = document.getElementById('spendingCategory');
+    
+            // Debug: Check if elements exist
+            console.log('spendingInput element:', spendingInput);
+            console.log('categorySelect element:', categorySelect);
+            console.log('spendingInput.value:', spendingInput ? spendingInput.value : 'null');
+    
+            if (!spendingInput || !categorySelect) {
+                console.error('Input elements not found!');
+                return;
+            }
+    
+            const rawValue = spendingInput.value;
+            const amount = parseFloat(rawValue);
+            const category = categorySelect.value;
+    
+            console.log('Raw value:', rawValue, 'Parsed amount:', amount, 'Category:', category); // Debug log
+    
+            if (!rawValue || rawValue.trim() === '' || isNaN(amount) || amount <= 0) {
+                console.log('Invalid amount, shaking input');
+                spendingInput.classList.add('shake');
+                setTimeout(() => {
+                    spendingInput.classList.remove('shake');
+                }, 500);
+                return;
+            }
+
+            const newTotal = appData.totalSpentToday + amount;
+    
+            // Check if this will exceed quota
+            if (newTotal > appData.dailyQuota) {
+                const excess = newTotal - appData.dailyQuota;
+                document.getElementById('excessAmount').textContent = `$${excess.toFixed(2)}`;
+        
+                appData.pendingTransaction = {
+                    amount: amount,
+                    category: category,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    timestamp: Date.now()
+                };
+        
+                showConfirmModal();
+                return;
+            }
+
+            // Process normal transaction
+            executeTransaction(amount, category);
+        }
+
+        function executeTransaction(amount, category) {
+            console.log('executeTransaction called with:', amount, category); // Debug log
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            appData.dailySpending.push({
+                amount: amount,
+                category: category,
+                time: timeString,
+                timestamp: now.getTime()
+            });
+
+            appData.totalSpentToday += amount;
+            appData.remainingBudget = appData.dailyQuota - appData.totalSpentToday;
+
+            console.log('Updated appData:', appData); // Debug log
+
+            document.getElementById('spendingAmount').value = '';
+            saveData();
+            updateDailyView();
+            
+            // Force icon refresh
+            setTimeout(() => {
+                lucide.createIcons();
+            }, 100);
+        }
+
+        function showConfirmModal() {
+            document.getElementById('confirmModal').classList.add('visible');
+        }
+
+        function hideConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('visible');
+        }
+
+        function cancelTransaction() {
+            appData.pendingTransaction = null;
+            hideConfirmModal();
+        }
+
+        function confirmTransaction() {
+            if (appData.pendingTransaction) {
+                executeTransaction(appData.pendingTransaction.amount, appData.pendingTransaction.category);
+                showWarning();
+                appData.pendingTransaction = null;
+            }
+            hideConfirmModal();
+        }
+
+        function showWarning() {
+            const warningEl = document.getElementById('warningMessage');
+            warningEl.style.display = 'flex';
+            setTimeout(() => {
+                warningEl.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess() {
+            const successEl = document.getElementById('successMessage');
+            successEl.style.display = 'flex';
+            setTimeout(() => {
+                successEl.style.display = 'none';
+            }, 3000);
+        }
+
+        // Day management
+        function endDay() {
+            let carryOver = 0;
+            
+            if (appData.totalSpentToday > appData.dailyQuota) {
+                // Apply painful fee - this reduces the total available money
+                carryOver = -appData.painfulFee;
+                appData.totalMonthlySpending -= appData.painfulFee; // Reduce total available money
+            } else {
+                // Carry over remaining balance
+                carryOver = appData.remainingBudget;
+                showSuccess();
+            }
+
+            // Reset for new day
+            appData.currentDay++;
+            appData.dailyQuota = (appData.totalMonthlySpending / 30) + carryOver;
+            appData.remainingBudget = appData.dailyQuota;
+            appData.dailySpending = [];
+            appData.totalSpentToday = 0;
+
+            saveData();
+            updateDailyView();
+        }
+
+        // UI Updates
+        function updateDailyView() {
+            document.getElementById('dailyQuotaAmount').textContent = `$${appData.dailyQuota.toFixed(2)}`;
+            document.getElementById('remainingBudget').textContent = `$${appData.remainingBudget.toFixed(2)}`;
+            document.getElementById('totalSpent').textContent = `$${appData.totalSpentToday.toFixed(2)}`;
+            
+            updateSpendingLog();
+        }
+
+        function updateSpendingLog() {
+            const logEl = document.getElementById('spendingLog');
+            
+            if (appData.dailySpending.length === 0) {
+                logEl.innerHTML = '<p style="text-align: center; color: var(--light-charcoal); font-size: 0.9rem;">No spending logged today</p>';
+                return;
+            }
+
+            const categoryIcons = {
+                food: '🍽️',
+                transportation: '🚗',
+                utilities: '⚡',
+                miscellaneous: '📦'
+            };
+
+            const entriesHtml = appData.dailySpending
+                .sort((a, b) => b.timestamp - a.timestamp)
+                .map(entry => `
+                    <div class="spending-entry">
+                        <div class="entry-details">
+                            <div class="entry-category">
+                                ${categoryIcons[entry.category]} ${entry.category.charAt(0).toUpperCase() + entry.category.slice(1)}
+                            </div>
+                            <div class="entry-time">${entry.time}</div>
+                        </div>
+                        <div class="entry-amount">$${entry.amount.toFixed(2)}</div>
+                    </div>
+                `).join('');
+
+            logEl.innerHTML = entriesHtml;
+        }
+
+        // Event listeners
+        document.getElementById('monthlyIncome').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateQuota();
+            }
+        });
+
+        document.getElementById('monthlyIncome').addEventListener('input', updateAllocation);
+
+        document.getElementById('spendingAmount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processTransaction();
+            }
+        });
+
+        // Format currency inputs
+        function formatCurrencyInput(input) {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value;
+                value = value.replace(/[^0-9.]/g, '');
+                const parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
+                }
+                if (parts[1] && parts[1].length > 2) {
+                    value = parts[0] + '.' + parts[1].substring(0, 2);
+                }
+                e.target.value = value;
+            });
+        }
+
+        formatCurrencyInput(document.getElementById('monthlyIncome'));
+        formatCurrencyInput(document.getElementById('spendingAmount'));
+
+        // Close modal when clicking outside
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cancelTransaction();
+            }
+        });
+
+        // Add this to the initialization section
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fallback event listener for transfer button
+            const transferButton = document.querySelector('.transfer-button');
+            if (transferButton) {
+                transferButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    processTransaction();
+                });
+            }
+        });
+
+        // Initialize app on load
+        window.addEventListener('load', initApp);
+    </script>
+</body>
+</html>
