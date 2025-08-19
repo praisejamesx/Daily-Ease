@@ -678,7 +678,7 @@
                         Monthly Income Amount
                     </label>
                     <div class="input-wrapper">
-                        <span class="currency-symbol">$</span>
+                        <span class="currency-symbol">₦</span>
                         <input 
                             type="number" 
                             id="monthlyIncome" 
@@ -711,7 +711,7 @@
                                 max="100"
                                 onchange="updateAllocation()"
                             >
-                            <div class="allocation-value" id="savingsAmount">$0.00</div>
+                            <div class="allocation-value" id="savingsAmount">₦0.00</div>
                         </div>
                         
                         <div class="allocation-item">
@@ -728,7 +728,7 @@
                                 max="100"
                                 onchange="updateAllocation()"
                             >
-                            <div class="allocation-value" id="spendingAllocationAmount">$0.00</div>
+                            <div class="allocation-value" id="spendingAllocationAmount">₦0.00</div>
                         </div>
                     </div>
                 </div>
@@ -761,17 +761,17 @@
             </div>
 
             <div class="quota-display">
-                <div class="quota-amount" id="dailyQuotaAmount">$0.00</div>
+                <div class="quota-amount" id="dailyQuotaAmount">₦0.00</div>
                 <div class="quota-label">Daily Spending Quota</div>
             </div>
 
             <div class="budget-info">
                 <div class="budget-card">
-                    <div class="budget-value" id="remainingBudget">$0.00</div>
+                    <div class="budget-value" id="remainingBudget">₦0.00</div>
                     <div class="budget-label">Remaining Today</div>
                 </div>
                 <div class="budget-card">
-                    <div class="budget-value" id="totalSpent">$0.00</div>
+                    <div class="budget-value" id="totalSpent">₦0.00</div>
                     <div class="budget-label">Spent Today</div>
                 </div>
             </div>
@@ -798,7 +798,7 @@
                     
                     <div class="transaction-row">
                         <div class="input-wrapper spending-input">
-                            <span class="currency-symbol">$</span>
+                            <span class="currency-symbol">₦</span>
                             <input 
                                 type="number" 
                                 id="spendingAmount" 
@@ -842,8 +842,8 @@
                 Quota Exceeded Warning
             </h3>
             <div class="modal-content">
-                <p>This transaction will exceed your daily quota by <strong id="excessAmount">$0.00</strong>.</p>
-                <p>A fee of <strong>$20.00</strong> will be deducted from tomorrow's budget, reducing your available spending money.</p>
+                <p>This transaction will exceed your daily quota by <strong id="excessAmount">₦0.00</strong>.</p>
+                <p>A fee of <strong>₦2000.00</strong> and 5% of your savings will be deducted from tomorrow's budget, reducing your available spending money.</p>
                 <p>Are you sure you want to proceed?</p>
             </div>
             <div class="modal-actions">
@@ -940,8 +940,8 @@
             const savingsAmount = income * (savingsPercent / 100);
             const spendingAmount = income * (spendingPercent / 100);
             
-            document.getElementById('savingsAmount').textContent = `$${savingsAmount.toFixed(2)}`;
-            document.getElementById('spendingAllocationAmount').textContent = `$${spendingAmount.toFixed(2)}`;
+            document.getElementById('savingsAmount').textContent = `₦${savingsAmount.toFixed(2)}`;
+            document.getElementById('spendingAllocationAmount').textContent = `₦${spendingAmount.toFixed(2)}`;
         }
 
         // Core calculation logic
@@ -1016,7 +1016,7 @@
             // Check if this will exceed quota
             if (newTotal > appData.dailyQuota) {
                 const excess = newTotal - appData.dailyQuota;
-                document.getElementById('excessAmount').textContent = `$${excess.toFixed(2)}`;
+                document.getElementById('excessAmount').textContent = `₦${excess.toFixed(2)}`;
         
                 appData.pendingTransaction = {
                     amount: amount,
@@ -1126,9 +1126,9 @@
 
         // UI Updates
         function updateDailyView() {
-            document.getElementById('dailyQuotaAmount').textContent = `$${appData.dailyQuota.toFixed(2)}`;
-            document.getElementById('remainingBudget').textContent = `$${appData.remainingBudget.toFixed(2)}`;
-            document.getElementById('totalSpent').textContent = `$${appData.totalSpentToday.toFixed(2)}`;
+            document.getElementById('dailyQuotaAmount').textContent = `₦${appData.dailyQuota.toFixed(2)}`;
+            document.getElementById('remainingBudget').textContent = `₦${appData.remainingBudget.toFixed(2)}`;
+            document.getElementById('totalSpent').textContent = `₦${appData.totalSpentToday.toFixed(2)}`;
             
             updateSpendingLog();
         }
@@ -1158,7 +1158,7 @@
                             </div>
                             <div class="entry-time">${entry.time}</div>
                         </div>
-                        <div class="entry-amount">$${entry.amount.toFixed(2)}</div>
+                        <div class="entry-amount">₦${entry.amount.toFixed(2)}</div>
                     </div>
                 `).join('');
 
