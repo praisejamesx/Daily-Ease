@@ -643,6 +643,22 @@
                 flex-direction: column;
             }
         }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success-green);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -674,13 +690,32 @@
                 
                 <div class="input-group">
                     <label for="monthlyIncome" class="input-label">
-                        ₦ Monthly Income Amount
+                        <i data-lucide="banknote" style="width: 16px; height: 16px;"></i>
+                        Monthly Income Amount
                     </label>
                     <div class="input-wrapper">
                         <span class="currency-symbol">₦</span>
                         <input 
                             type="number" 
                             id="monthlyIncome" 
+                            class="input-field with-symbol" 
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                        >
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="monthlyUtilities" class="input-label">
+                        <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
+                        Monthly Utilities Amount
+                    </label>
+                    <div class="input-wrapper">
+                        <span class="currency-symbol">₦</span>
+                        <input 
+                            type="number" 
+                            id="monthlyUtilities" 
                             class="input-field with-symbol" 
                             placeholder="0.00"
                             step="0.01"
@@ -708,7 +743,6 @@
                                 value="30"
                                 min="0"
                                 max="100"
-                                onchange="updateAllocation()"
                             >
                             <div class="allocation-value" id="savingsAmount">₦0.00</div>
                         </div>
@@ -725,7 +759,6 @@
                                 value="70"
                                 min="0"
                                 max="100"
-                                onchange="updateAllocation()"
                             >
                             <div class="allocation-value" id="spendingAllocationAmount">₦0.00</div>
                         </div>
@@ -790,7 +823,6 @@
                         <select id="spendingCategory" class="select-field">
                             <option value="food">🍽️ Food</option>
                             <option value="transportation">🚗 Transportation</option>
-                            <option value="utilities">⚡ Utilities</option>
                             <option value="miscellaneous">📦 Miscellaneous</option>
                         </select>
                     </div>
@@ -842,7 +874,7 @@
             </h3>
             <div class="modal-content">
                 <p>This transaction will exceed your daily quota by <strong id="excessAmount">₦0.00</strong>.</p>
-                <p>A fee of <strong>₦2000.00</strong> and 5% of your savings will be deducted from tomorrow's budget, reducing your available spending money.</p>
+                <p>A fee of <strong>₦20.00</strong> will be deducted from tomorrow's budget, reducing your available spending money.</p>
                 <p>Are you sure you want to proceed?</p>
             </div>
             <div class="modal-actions">
@@ -865,7 +897,8 @@
             dailySpending: [],
             remainingBudget: 0,
             totalSpentToday: 0,
-            painfulFee: 20,
+            baseFee: 2000,
+            savingsFeePercent: 5,
             pendingTransaction: null
         };
 
@@ -925,28 +958,82 @@
             }, 400);
         }
 
-        // Budget allocation
+        function setupPercentageListeners() {
+            const savingsSlider = document.getElementById('savingsPercent');
+            const spendingSlider = document.getElementById('spendingPercent');
+            
+            savingsSlider.addEventListener('input', function() {
+                const savingsPercent = parseInt(this.value);
+                const spendingPercent = 100 - savingsPercent;
+                document.getElementById('spendingPercent').value = spendingPercent;
+                updateAllocationAmounts();
+            });
+            
+            spendingSlider.addEventListener('input', function() {
+                const spendingPercent = parseInt(this.value);
+                const savingsPercent = 100 - spendingPercent;
+                document.getElementById('savingsPercent').value = savingsPercent;
+                updateAllocationAmounts();
+            });
+        }
+
+        function updateAllocationAmounts() {
+            const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
+            const utilities = parseFloat(document.getElementById('monthlyUtilities').value) || 0;
+            const netIncome = income - utilities;
+            
+            if (netIncome <= 0) {
+                document.getElementById('savingsAmount').textContent = '₦0.00';
+                document.getElementById('spendingAllocationAmount').textContent = '₦0.00';
+                return;
+            }
+
+            const savingsPercent = parseInt(document.getElementById('savingsPercent').value);
+            const spendingPercent = parseInt(document.getElementById('spendingPercent').value);
+            
+            const savings = (netIncome * savingsPercent) / 100;
+            const spending = (netIncome * spendingPercent) / 100;
+
+            document.getElementById('savingsAmount').textContent = `₦${savings.toFixed(2)}`;
+            document.getElementById('spendingAllocationAmount').textContent = `₦${spending.toFixed(2)}`;
+        }
+
+        // Update allocation display
         function updateAllocation() {
             const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
-            const savingsPercent = parseInt(document.getElementById('savingsPercent').value) || 0;
-            const spendingPercent = parseInt(document.getElementById('spendingPercent').value) || 0;
-            
-            // Ensure percentages sum to 100
-            if (savingsPercent + spendingPercent !== 100) {
-                document.getElementById('spendingPercent').value = 100 - savingsPercent;
+            const utilities = parseFloat(document.getElementById('monthlyUtilities').value) || 0;
+            const netIncome = income - utilities;
+
+            if (netIncome <= 0) {
+                document.getElementById('savingsAmount').textContent = '₦0.00';
+                document.getElementById('spendingAllocationAmount').textContent = '₦0.00';
+                appData.dailyQuota = 0;
+                appData.totalSavings = 0;
+                appData.totalMonthlySpending = 0;
+                return;
             }
-            
-            const savingsAmount = income * (savingsPercent / 100);
-            const spendingAmount = income * (spendingPercent / 100);
-            
-            document.getElementById('savingsAmount').textContent = `₦${savingsAmount.toFixed(2)}`;
-            document.getElementById('spendingAllocationAmount').textContent = `₦${spendingAmount.toFixed(2)}`;
+
+            const savings = (netIncome * appData.savingsPercent) / 100;
+            const spending = (netIncome * appData.spendingPercent) / 100;
+            const dailyQuota = spending / 30;
+
+            appData.dailyQuota = dailyQuota;
+            appData.totalSavings = savings;
+            appData.totalMonthlySpending = spending;
+
+            document.getElementById('savingsAmount').textContent = `₦${savings.toFixed(2)}`;
+            document.getElementById('spendingAllocationAmount').textContent = `₦${spending.toFixed(2)}`;
+
+            updateDailyView();
+            saveData();
         }
 
         // Core calculation logic
         function calculateQuota() {
             const incomeInput = document.getElementById('monthlyIncome');
+            const utilitiesInput = document.getElementById('monthlyUtilities');
             const income = parseFloat(incomeInput.value);
+            const utilities = parseFloat(utilitiesInput.value) || 0;
             const savingsPercent = parseInt(document.getElementById('savingsPercent').value);
             const spendingPercent = parseInt(document.getElementById('spendingPercent').value);
             
@@ -958,21 +1045,18 @@
                 return;
             }
 
-            if (savingsPercent + spendingPercent !== 100) {
-                alert('Savings and spending percentages must sum to 100%');
-                return;
-            }
-
-            // Calculate allocations
+            const netIncome = income - utilities;
             appData.monthlyIncome = income;
             appData.savingsPercent = savingsPercent;
             appData.spendingPercent = spendingPercent;
-            appData.totalSavings = income * (savingsPercent / 100);
-            appData.totalMonthlySpending = income * (spendingPercent / 100);
+            appData.totalSavings = (netIncome * savingsPercent) / 100;
+            appData.totalMonthlySpending = (netIncome * spendingPercent) / 100;
             appData.dailyQuota = appData.totalMonthlySpending / 30;
             appData.remainingBudget = appData.dailyQuota;
             appData.dailySpending = [];
             appData.totalSpentToday = 0;
+
+            console.log('[v0] Quota calculated - Net income:', netIncome, 'Daily quota:', appData.dailyQuota);
 
             saveData();
             showDailyScreen();
@@ -980,18 +1064,13 @@
 
         // Transaction processing - FIXED VERSION
         function processTransaction() {
-            console.log('processTransaction called'); // Debug log
+            console.log('[v0] processTransaction called');
     
             const spendingInput = document.getElementById('spendingAmount');
             const categorySelect = document.getElementById('spendingCategory');
     
-            // Debug: Check if elements exist
-            console.log('spendingInput element:', spendingInput);
-            console.log('categorySelect element:', categorySelect);
-            console.log('spendingInput.value:', spendingInput ? spendingInput.value : 'null');
-    
             if (!spendingInput || !categorySelect) {
-                console.error('Input elements not found!');
+                console.error('[v0] Input elements not found!');
                 return;
             }
     
@@ -999,10 +1078,10 @@
             const amount = parseFloat(rawValue);
             const category = categorySelect.value;
     
-            console.log('Raw value:', rawValue, 'Parsed amount:', amount, 'Category:', category); // Debug log
+            console.log('[v0] Transaction - Amount:', amount, 'Category:', category);
     
             if (!rawValue || rawValue.trim() === '' || isNaN(amount) || amount <= 0) {
-                console.log('Invalid amount, shaking input');
+                console.log('[v0] Invalid amount, shaking input');
                 spendingInput.classList.add('shake');
                 setTimeout(() => {
                     spendingInput.classList.remove('shake');
@@ -1010,12 +1089,26 @@
                 return;
             }
 
+            if (!category) {
+                console.log('[v0] No category selected, shaking select');
+                categorySelect.classList.add('shake');
+                setTimeout(() => {
+                    categorySelect.classList.remove('shake');
+                }, 500);
+                return;
+            }
+
             const newTotal = appData.totalSpentToday + amount;
     
-            // Check if this will exceed quota
             if (newTotal > appData.dailyQuota) {
                 const excess = newTotal - appData.dailyQuota;
                 document.getElementById('excessAmount').textContent = `₦${excess.toFixed(2)}`;
+                
+                const painfulFee = appData.baseFee + (appData.totalSavings * appData.savingsFeePercent / 100);
+                const feeElement = document.querySelector('.modal-content p:nth-child(2)');
+                if (feeElement) {
+                    feeElement.innerHTML = `A fee of <strong>₦${painfulFee.toFixed(2)}</strong> will be deducted from tomorrow's budget, reducing your available spending money.`;
+                }
         
                 appData.pendingTransaction = {
                     amount: amount,
@@ -1028,12 +1121,11 @@
                 return;
             }
 
-            // Process normal transaction
             executeTransaction(amount, category);
         }
 
         function executeTransaction(amount, category) {
-            console.log('executeTransaction called with:', amount, category); // Debug log
+            console.log('[v0] executeTransaction called with:', amount, category);
             
             const now = new Date();
             const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1045,79 +1137,87 @@
                 timestamp: now.getTime()
             });
 
+            const previousTotal = appData.totalSpentToday;
             appData.totalSpentToday += amount;
             appData.remainingBudget = appData.dailyQuota - appData.totalSpentToday;
 
-            console.log('Updated appData:', appData); // Debug log
+            if (appData.totalSpentToday > appData.dailyQuota) {
+                const excess = appData.totalSpentToday - appData.dailyQuota;
+                const painfulFee = appData.baseFee + (appData.totalSavings * appData.savingsFeePercent / 100);
+                
+                // Transfer excess + fee from savings to spending
+                const totalTransfer = excess + painfulFee;
+                
+                if (appData.totalSavings >= totalTransfer) {
+                    appData.totalSavings -= totalTransfer;
+                    appData.totalMonthlySpending += excess; // Add the excess to total spending pool
+                    
+                    // Recalculate daily quota based on new spending amount and remaining days
+                    const today = new Date();
+                    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                    const currentDay = today.getDate();
+                    const remainingDays = daysInMonth - currentDay + 1;
+                    
+                    if (remainingDays > 0) {
+                        const remainingSpending = appData.totalMonthlySpending - appData.totalSpentToday;
+                        appData.dailyQuota = remainingSpending / remainingDays;
+                    }
+                    
+                    appData.remainingBudget = appData.dailyQuota - appData.totalSpentToday;
+                    
+                    showNotification(`₦${totalTransfer.toFixed(2)} transferred from savings (₦${excess.toFixed(2)} overage + ₦${painfulFee.toFixed(2)} fee)`, 'warning');
+                } else {
+                    showNotification('Insufficient savings to cover overspending!', 'error');
+                    return;
+                }
+            }
 
             document.getElementById('spendingAmount').value = '';
+            document.getElementById('spendingCategory').value = '';
+
             saveData();
             updateDailyView();
             
-            // Force icon refresh
-            setTimeout(() => {
-                lucide.createIcons();
-            }, 100);
-        }
-
-        function showConfirmModal() {
-            document.getElementById('confirmModal').classList.add('visible');
-        }
-
-        function hideConfirmModal() {
-            document.getElementById('confirmModal').classList.remove('visible');
-        }
-
-        function cancelTransaction() {
-            appData.pendingTransaction = null;
-            hideConfirmModal();
-        }
-
-        function confirmTransaction() {
-            if (appData.pendingTransaction) {
-                executeTransaction(appData.pendingTransaction.amount, appData.pendingTransaction.category);
-                showWarning();
-                appData.pendingTransaction = null;
-            }
-            hideConfirmModal();
-        }
-
-        function showWarning() {
-            const warningEl = document.getElementById('warningMessage');
-            warningEl.style.display = 'flex';
-            setTimeout(() => {
-                warningEl.style.display = 'none';
-            }, 5000);
-        }
-
-        function showSuccess() {
-            const successEl = document.getElementById('successMessage');
-            successEl.style.display = 'flex';
-            setTimeout(() => {
-                successEl.style.display = 'none';
-            }, 3000);
+            showNotification(`₦${amount.toFixed(2)} spent on ${category}`, 'success');
         }
 
         // Day management
         function endDay() {
+            if (appData.currentDay >= 30) {
+                alert('Month completed! Please reset your budget for a new month.');
+                return;
+            }
+
             let carryOver = 0;
             
             if (appData.totalSpentToday > appData.dailyQuota) {
-                // Apply painful fee - this reduces the total available money
-                carryOver = -appData.painfulFee;
-                appData.totalMonthlySpending -= appData.painfulFee; // Reduce total available money
+                // Calculate painful fee: 2000 + 5% of savings
+                const painfulFee = appData.baseFee + (appData.totalSavings * appData.savingsFeePercent / 100);
+                carryOver = -painfulFee;
+                appData.totalMonthlySpending -= painfulFee; // Reduce total available money
+                console.log('[v0] Overspent - Fee applied:', painfulFee);
             } else {
-                // Carry over remaining balance
                 carryOver = appData.remainingBudget;
+                console.log('[v0] Under budget - Carrying over:', carryOver);
                 showSuccess();
             }
 
-            // Reset for new day
             appData.currentDay++;
-            appData.dailyQuota = (appData.totalMonthlySpending / 30) + carryOver;
-            appData.remainingBudget = appData.dailyQuota;
+            const remainingDays = 30 - appData.currentDay + 1;
+            
+            if (remainingDays <= 0) {
+                appData.dailyQuota = 0;
+                appData.remainingBudget = 0;
+            } else {
+                const baseQuota = appData.totalMonthlySpending / remainingDays;
+                appData.dailyQuota = Math.max(0, baseQuota + carryOver);
+                appData.remainingBudget = appData.dailyQuota;
+            }
+            
             appData.dailySpending = [];
             appData.totalSpentToday = 0;
+
+            console.log('[v0] Day ended - New daily quota:', appData.dailyQuota, 'Remaining days:', remainingDays);
 
             saveData();
             updateDailyView();
@@ -1143,7 +1243,6 @@
             const categoryIcons = {
                 food: '🍽️',
                 transportation: '🚗',
-                utilities: '⚡',
                 miscellaneous: '📦'
             };
 
@@ -1167,11 +1266,15 @@
         // Event listeners
         document.getElementById('monthlyIncome').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                calculateQuota();
+                updateAllocation();
             }
         });
 
-        document.getElementById('monthlyIncome').addEventListener('input', updateAllocation);
+        document.getElementById('monthlyUtilities').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                updateAllocation();
+            }
+        });
 
         document.getElementById('spendingAmount').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -1196,6 +1299,7 @@
         }
 
         formatCurrencyInput(document.getElementById('monthlyIncome'));
+        formatCurrencyInput(document.getElementById('monthlyUtilities'));
         formatCurrencyInput(document.getElementById('spendingAmount'));
 
         // Close modal when clicking outside
@@ -1205,20 +1309,120 @@
             }
         });
 
-        // Add this to the initialization section
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'var(--success-green)' : type === 'warning' ? '#ff9800' : 'var(--primary-blue)'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                font-weight: 500;
+                transform: translateY(100px);
+                opacity: 0;
+                transition: all 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateY(0)';
+                notification.style.opacity = '1';
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateY(100px)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function showSuccess() {
+            const button = document.querySelector('.danger-button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i data-lucide="check" style="width: 20px; height: 20px;"></i> Day Completed!';
+            button.style.backgroundColor = 'var(--success-green)';
+            
+            showNotification('Day completed! Budget rolled over successfully.', 'success');
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.backgroundColor = '';
+            }, 2000);
+        }
+
+        // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
-            // Fallback event listener for transfer button
-            const transferButton = document.querySelector('.transfer-button');
-            if (transferButton) {
-                transferButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    processTransaction();
-                });
+            lucide.createIcons();
+            loadData();
+            
+            setupPercentageListeners();
+            
+            document.getElementById('monthlyIncome').addEventListener('input', updateAllocationAmounts);
+            document.getElementById('monthlyUtilities').addEventListener('input', updateAllocationAmounts);
+            
+            if (appData.monthlyIncome > 0) {
+                showDailyScreen();
             }
         });
 
-        // Initialize app on load
         window.addEventListener('load', initApp);
+
+        function setupPercentageSliders() {
+            const savingsSlider = document.getElementById('savingsPercent');
+            const spendingSlider = document.getElementById('spendingPercent');
+            
+            savingsSlider.addEventListener('input', function() {
+                const savingsValue = parseInt(this.value);
+                const spendingValue = 100 - savingsValue;
+                spendingSlider.value = spendingValue;
+                document.getElementById('savingsPercentDisplay').textContent = savingsValue + '%';
+                document.getElementById('spendingPercentDisplay').textContent = spendingValue + '%';
+                appData.savingsPercent = savingsValue;
+                appData.spendingPercent = spendingValue;
+                updateAllocation();
+            });
+            
+            spendingSlider.addEventListener('input', function() {
+                const spendingValue = parseInt(this.value);
+                const savingsValue = 100 - spendingValue;
+                savingsSlider.value = savingsValue;
+                document.getElementById('savingsPercentDisplay').textContent = savingsValue + '%';
+                document.getElementById('spendingPercentDisplay').textContent = spendingValue + '%';
+                appData.savingsPercent = savingsValue;
+                appData.spendingPercent = spendingValue;
+                updateAllocation();
+            });
+        }
+
+        function showConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function cancelTransaction() {
+            document.getElementById('confirmModal').style.display = 'none';
+            appData.pendingTransaction = null;
+        }
+
+        function confirmTransaction() {
+            if (appData.pendingTransaction) {
+                executeTransaction(appData.pendingTransaction.amount, appData.pendingTransaction.category);
+                appData.pendingTransaction = null;
+            }
+            document.getElementById('confirmModal').style.display = 'none';
+        }
     </script>
 </body>
 </html>
