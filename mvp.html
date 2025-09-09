@@ -6,6 +6,7 @@
     <title>Daily Ease - Financial Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -24,6 +25,8 @@
             --border-color: #d4c5a9;
             --warning-red: #8b2635;
             --success-green: #4a6741;
+            --bubble-user: #e2f0d9;
+            --bubble-ai: #d9e2f0;
         }
 
         body {
@@ -42,6 +45,59 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+        }
+
+        /* Dynamic Welcome Message */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--forest-green) 0%, var(--deep-forest) 100%);
+            color: var(--soft-parchment);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(45, 74, 62, 0.3);
+        }
+
+        .welcome-day {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-message {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Real-time Balance Tracker */
+        .balance-tracker {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--accent-gold);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(184, 134, 11, 0.2);
+        }
+
+        .balance-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--deep-forest);
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-subtitle {
+            font-size: 0.8rem;
+            color: var(--light-charcoal);
         }
 
         .app-header {
@@ -556,6 +612,202 @@
             color: white;
         }
 
+        /* AI Chat Styles */
+        #ai-toggle-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--forest-green);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            z-index: 1000;
+        }
+
+        #ai-toggle-button:hover {
+            background-color: var(--accent-gold);
+            transform: scale(1.05);
+        }
+
+        #ai-chat-popup {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out, visibility 0.4s;
+            z-index: 999;
+        }
+
+        #ai-chat-popup.open {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #chat-header {
+            background-color: var(--forest-green);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        #chat-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        #chat-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        #chat-window {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: var(--parchment-yellow);
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background-color: var(--bubble-user);
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-message.ai {
+            align-self: flex-start;
+            background-color: var(--bubble-ai);
+            border-bottom-left-radius: 5px;
+        }
+
+        #chat-input-container {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        #chat-input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        #chat-send-btn {
+            background-color: var(--forest-green);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #chat-send-btn:hover {
+            background-color: var(--accent-gold);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #888;
+            font-style: italic;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #888;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        .dot:nth-child(3) { animation-delay: 0s; }
+
+        /* PDF Upload Styles */
+        .pdf-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pdf-upload-area:hover {
+            border-color: var(--forest-green);
+            background-color: rgba(45, 74, 62, 0.05);
+        }
+
+        .pdf-upload-area.dragover {
+            border-color: var(--accent-gold);
+            background-color: rgba(184, 134, 11, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: var(--light-charcoal);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            color: var(--charcoal-gray);
+            font-size: 0.9rem;
+        }
+
+        #pdf-file-input {
+            display: none;
+        }
+
         /* Animations */
         @keyframes pulse {
             0%, 100% { opacity: 1; }
@@ -585,6 +837,27 @@
 
         .fade-in-up {
             animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success-green);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
         }
 
         /* Responsive Design */
@@ -642,28 +915,24 @@
             .modal-actions {
                 flex-direction: column;
             }
-        }
 
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--success-green);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            font-weight: 500;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s ease;
+            #ai-chat-popup {
+                width: 90vw;
+                right: 5vw;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Landing Screen -->
         <div id="landingScreen" class="screen landing-screen visible fade-in-up">
+            <!-- Dynamic Welcome Banner -->
+            <div class="welcome-banner">
+                <div class="welcome-day" id="welcomeDay">Welcome to Monday</div>
+                <div class="welcome-message" id="welcomeMessage">Start your week with financial clarity</div>
+            </div>
+
             <div class="app-header">
                 <div class="crest-icon"></div>
                 <h1 class="app-title">Daily Ease</h1>
@@ -676,7 +945,14 @@
             </button>
         </div>
 
+        <!-- Main Screen -->
         <div id="mainScreen" class="screen">
+            <!-- Dynamic Welcome Banner -->
+            <div class="welcome-banner">
+                <div class="welcome-day" id="welcomeDay2">Welcome to Monday</div>
+                <div class="welcome-message" id="welcomeMessage2">Configure your financial foundation</div>
+            </div>
+
             <div class="app-header">
                 <div class="crest-icon"></div>
                 <h1 class="app-title">Daily Ease</h1>
@@ -776,7 +1052,21 @@
             </div>
         </div>
 
+        <!-- Daily Screen -->
         <div id="dailyScreen" class="screen">
+            <!-- Dynamic Welcome Banner -->
+            <div class="welcome-banner">
+                <div class="welcome-day" id="welcomeDay3">Welcome to Monday</div>
+                <div class="welcome-message" id="welcomeMessage3">Track your daily financial progress</div>
+            </div>
+
+            <!-- Real-time Balance Tracker -->
+            <div class="balance-tracker">
+                <div class="balance-title">Monthly Spending Balance</div>
+                <div class="balance-amount" id="monthlyBalance">₦0.00</div>
+                <div class="balance-subtitle">Remaining this month</div>
+            </div>
+
             <div class="app-header">
                 <div class="crest-icon"></div>
                 <h1 class="app-title">Daily Ease</h1>
@@ -866,6 +1156,7 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal">
             <h3 class="modal-title">
@@ -884,15 +1175,48 @@
         </div>
     </div>
 
+    <!-- AI Chat Interface -->
+    <button id="ai-toggle-button">
+        <i class="fas fa-brain"></i>
+    </button>
+
+    <div id="ai-chat-popup">
+        <div id="chat-header">
+            <h3>💰 Money Therapist</h3>
+            <button id="chat-close-btn">&times;</button>
+        </div>
+        <div id="chat-window">
+            <div class="chat-message ai">
+                🔥 Ready to roast your spending habits? Upload your bank statement PDF and I'll tell you exactly where your money is bleeding out.
+            </div>
+            <div class="pdf-upload-area" onclick="document.getElementById('pdf-file-input').click()">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">
+                    <strong>Click to upload your bank statement PDF</strong><br>
+                    or drag and drop it here
+                </div>
+            </div>
+            <input type="file" id="pdf-file-input" accept=".pdf" />
+        </div>
+        <div id="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Ask about your spending..." />
+            <button id="chat-send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
     <script>
         // App State
         let appData = {
             monthlyIncome: 0,
+            monthlyUtilities: 0,
             savingsPercent: 30,
             spendingPercent: 70,
             dailyQuota: 0,
             totalSavings: 0,
             totalMonthlySpending: 0,
+            remainingMonthlySpending: 0,
             currentDay: 1,
             dailySpending: [],
             remainingBudget: 0,
@@ -902,12 +1226,64 @@
             pendingTransaction: null
         };
 
+        // Dynamic Welcome Messages
+        const welcomeMessages = {
+            0: { day: "Welcome to Sunday", message: "Plan your week with financial wisdom" },
+            1: { day: "Welcome to Monday", message: "Start your week with financial clarity" },
+            2: { day: "Welcome to Tuesday", message: "Keep your momentum going strong" },
+            3: { day: "Welcome to Wednesday", message: "Midweek financial check-in" },
+            4: { day: "Welcome to Thursday", message: "Almost there, stay disciplined" },
+            5: { day: "Welcome to Friday", message: "End the week on a high note" },
+            6: { day: "Welcome to Saturday", message: "Weekend wisdom for your wallet" }
+        };
+
         // Initialize app
         function initApp() {
             loadData();
+            updateWelcomeMessage();
             updateAllocation();
             updateDailyView();
+            updateMonthlyBalance();
             lucide.createIcons();
+            initializeAI();
+        }
+
+        // Update welcome message based on current day
+        function updateWelcomeMessage() {
+            const today = new Date().getDay();
+            const welcome = welcomeMessages[today];
+            
+            // Update all welcome banners
+            const dayElements = ['welcomeDay', 'welcomeDay2', 'welcomeDay3'];
+            const messageElements = ['welcomeMessage', 'welcomeMessage2', 'welcomeMessage3'];
+            
+            dayElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = welcome.day;
+            });
+            
+            messageElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = welcome.message;
+            });
+        }
+
+        // Update monthly balance tracker
+        function updateMonthlyBalance() {
+            const balanceElement = document.getElementById('monthlyBalance');
+            if (balanceElement) {
+                balanceElement.textContent = `₦${appData.remainingMonthlySpending.toFixed(2)}`;
+                
+                // Color coding based on remaining balance
+                const percentage = (appData.remainingMonthlySpending / appData.totalMonthlySpending) * 100;
+                if (percentage < 20) {
+                    balanceElement.style.color = 'var(--warning-red)';
+                } else if (percentage < 50) {
+                    balanceElement.style.color = '#ff9800';
+                } else {
+                    balanceElement.style.color = 'var(--accent-gold)';
+                }
+            }
         }
 
         // Data persistence
@@ -943,6 +1319,7 @@
                 document.getElementById('monthlyIncome').focus();
                 if (appData.monthlyIncome > 0) {
                     document.getElementById('monthlyIncome').value = appData.monthlyIncome;
+                    document.getElementById('monthlyUtilities').value = appData.monthlyUtilities || 0;
                     document.getElementById('savingsPercent').value = appData.savingsPercent;
                     document.getElementById('spendingPercent').value = appData.spendingPercent;
                     updateAllocation();
@@ -953,11 +1330,13 @@
         function showDailyScreen() {
             showScreen('dailyScreen');
             updateDailyView();
+            updateMonthlyBalance();
             setTimeout(() => {
                 document.getElementById('spendingAmount').focus();
             }, 400);
         }
 
+        // Budget allocation
         function setupPercentageListeners() {
             const savingsSlider = document.getElementById('savingsPercent');
             const spendingSlider = document.getElementById('spendingPercent');
@@ -998,18 +1377,18 @@
             document.getElementById('spendingAllocationAmount').textContent = `₦${spending.toFixed(2)}`;
         }
 
-        // Update allocation display
         function updateAllocation() {
-            const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
-            const utilities = parseFloat(document.getElementById('monthlyUtilities').value) || 0;
+            const income = parseFloat(document.getElementById('monthlyIncome')?.value) || appData.monthlyIncome || 0;
+            const utilities = parseFloat(document.getElementById('monthlyUtilities')?.value) || appData.monthlyUtilities || 0;
             const netIncome = income - utilities;
 
             if (netIncome <= 0) {
-                document.getElementById('savingsAmount').textContent = '₦0.00';
-                document.getElementById('spendingAllocationAmount').textContent = '₦0.00';
+                document.getElementById('savingsAmount')?.textContent && (document.getElementById('savingsAmount').textContent = '₦0.00');
+                document.getElementById('spendingAllocationAmount')?.textContent && (document.getElementById('spendingAllocationAmount').textContent = '₦0.00');
                 appData.dailyQuota = 0;
                 appData.totalSavings = 0;
                 appData.totalMonthlySpending = 0;
+                appData.remainingMonthlySpending = 0;
                 return;
             }
 
@@ -1020,11 +1399,17 @@
             appData.dailyQuota = dailyQuota;
             appData.totalSavings = savings;
             appData.totalMonthlySpending = spending;
+            appData.remainingMonthlySpending = spending;
 
-            document.getElementById('savingsAmount').textContent = `₦${savings.toFixed(2)}`;
-            document.getElementById('spendingAllocationAmount').textContent = `₦${spending.toFixed(2)}`;
+            if (document.getElementById('savingsAmount')) {
+                document.getElementById('savingsAmount').textContent = `₦${savings.toFixed(2)}`;
+            }
+            if (document.getElementById('spendingAllocationAmount')) {
+                document.getElementById('spendingAllocationAmount').textContent = `₦${spending.toFixed(2)}`;
+            }
 
             updateDailyView();
+            updateMonthlyBalance();
             saveData();
         }
 
@@ -1047,30 +1432,32 @@
 
             const netIncome = income - utilities;
             appData.monthlyIncome = income;
+            appData.monthlyUtilities = utilities;
             appData.savingsPercent = savingsPercent;
             appData.spendingPercent = spendingPercent;
             appData.totalSavings = (netIncome * savingsPercent) / 100;
             appData.totalMonthlySpending = (netIncome * spendingPercent) / 100;
+            appData.remainingMonthlySpending = appData.totalMonthlySpending;
             appData.dailyQuota = appData.totalMonthlySpending / 30;
             appData.remainingBudget = appData.dailyQuota;
             appData.dailySpending = [];
             appData.totalSpentToday = 0;
 
-            console.log('[v0] Quota calculated - Net income:', netIncome, 'Daily quota:', appData.dailyQuota);
+            console.log('[Daily Ease] Quota calculated - Net income:', netIncome, 'Daily quota:', appData.dailyQuota);
 
             saveData();
             showDailyScreen();
         }
 
-        // Transaction processing - FIXED VERSION
+        // Transaction processing
         function processTransaction() {
-            console.log('[v0] processTransaction called');
+            console.log('[Daily Ease] processTransaction called');
     
             const spendingInput = document.getElementById('spendingAmount');
             const categorySelect = document.getElementById('spendingCategory');
     
             if (!spendingInput || !categorySelect) {
-                console.error('[v0] Input elements not found!');
+                console.error('[Daily Ease] Input elements not found!');
                 return;
             }
     
@@ -1078,10 +1465,10 @@
             const amount = parseFloat(rawValue);
             const category = categorySelect.value;
     
-            console.log('[v0] Transaction - Amount:', amount, 'Category:', category);
+            console.log('[Daily Ease] Transaction - Amount:', amount, 'Category:', category);
     
             if (!rawValue || rawValue.trim() === '' || isNaN(amount) || amount <= 0) {
-                console.log('[v0] Invalid amount, shaking input');
+                console.log('[Daily Ease] Invalid amount, shaking input');
                 spendingInput.classList.add('shake');
                 setTimeout(() => {
                     spendingInput.classList.remove('shake');
@@ -1090,7 +1477,7 @@
             }
 
             if (!category) {
-                console.log('[v0] No category selected, shaking select');
+                console.log('[Daily Ease] No category selected, shaking select');
                 categorySelect.classList.add('shake');
                 setTimeout(() => {
                     categorySelect.classList.remove('shake');
@@ -1125,7 +1512,7 @@
         }
 
         function executeTransaction(amount, category) {
-            console.log('[v0] executeTransaction called with:', amount, category);
+            console.log('[Daily Ease] executeTransaction called with:', amount, category);
             
             const now = new Date();
             const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1137,22 +1524,23 @@
                 timestamp: now.getTime()
             });
 
-            const previousTotal = appData.totalSpentToday;
             appData.totalSpentToday += amount;
             appData.remainingBudget = appData.dailyQuota - appData.totalSpentToday;
+            
+            // Update monthly balance in real-time
+            appData.remainingMonthlySpending -= amount;
 
             if (appData.totalSpentToday > appData.dailyQuota) {
                 const excess = appData.totalSpentToday - appData.dailyQuota;
                 const painfulFee = appData.baseFee + (appData.totalSavings * appData.savingsFeePercent / 100);
                 
-                // Transfer excess + fee from savings to spending
                 const totalTransfer = excess + painfulFee;
                 
                 if (appData.totalSavings >= totalTransfer) {
                     appData.totalSavings -= totalTransfer;
-                    appData.totalMonthlySpending += excess; // Add the excess to total spending pool
+                    appData.totalMonthlySpending += excess;
+                    appData.remainingMonthlySpending += excess;
                     
-                    // Recalculate daily quota based on new spending amount and remaining days
                     const today = new Date();
                     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
                     const currentDay = today.getDate();
@@ -1173,12 +1561,34 @@
             }
 
             document.getElementById('spendingAmount').value = '';
-            document.getElementById('spendingCategory').value = '';
 
             saveData();
             updateDailyView();
+            updateMonthlyBalance();
             
-            showNotification(`₦${amount.toFixed(2)} spent on ${category}`, 'success');
+            // Show real-time balance update notification
+            showNotification(`₦${amount.toFixed(2)} spent on ${category}. Monthly balance: ₦${appData.remainingMonthlySpending.toFixed(2)}`, 'success');
+        }
+
+        function showConfirmModal() {
+            document.getElementById('confirmModal').classList.add('visible');
+        }
+
+        function hideConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('visible');
+        }
+
+        function cancelTransaction() {
+            appData.pendingTransaction = null;
+            hideConfirmModal();
+        }
+
+        function confirmTransaction() {
+            if (appData.pendingTransaction) {
+                executeTransaction(appData.pendingTransaction.amount, appData.pendingTransaction.category);
+                appData.pendingTransaction = null;
+            }
+            hideConfirmModal();
         }
 
         // Day management
@@ -1191,14 +1601,14 @@
             let carryOver = 0;
             
             if (appData.totalSpentToday > appData.dailyQuota) {
-                // Calculate painful fee: 2000 + 5% of savings
                 const painfulFee = appData.baseFee + (appData.totalSavings * appData.savingsFeePercent / 100);
                 carryOver = -painfulFee;
-                appData.totalMonthlySpending -= painfulFee; // Reduce total available money
-                console.log('[v0] Overspent - Fee applied:', painfulFee);
+                appData.totalMonthlySpending -= painfulFee;
+                appData.remainingMonthlySpending -= painfulFee;
+                console.log('[Daily Ease] Overspent - Fee applied:', painfulFee);
             } else {
                 carryOver = appData.remainingBudget;
-                console.log('[v0] Under budget - Carrying over:', carryOver);
+                console.log('[Daily Ease] Under budget - Carrying over:', carryOver);
                 showSuccess();
             }
 
@@ -1209,7 +1619,7 @@
                 appData.dailyQuota = 0;
                 appData.remainingBudget = 0;
             } else {
-                const baseQuota = appData.totalMonthlySpending / remainingDays;
+                const baseQuota = appData.remainingMonthlySpending / remainingDays;
                 appData.dailyQuota = Math.max(0, baseQuota + carryOver);
                 appData.remainingBudget = appData.dailyQuota;
             }
@@ -1217,23 +1627,31 @@
             appData.dailySpending = [];
             appData.totalSpentToday = 0;
 
-            console.log('[v0] Day ended - New daily quota:', appData.dailyQuota, 'Remaining days:', remainingDays);
+            console.log('[Daily Ease] Day ended - New daily quota:', appData.dailyQuota, 'Remaining days:', remainingDays);
 
             saveData();
             updateDailyView();
+            updateMonthlyBalance();
         }
 
         // UI Updates
         function updateDailyView() {
-            document.getElementById('dailyQuotaAmount').textContent = `₦${appData.dailyQuota.toFixed(2)}`;
-            document.getElementById('remainingBudget').textContent = `₦${appData.remainingBudget.toFixed(2)}`;
-            document.getElementById('totalSpent').textContent = `₦${appData.totalSpentToday.toFixed(2)}`;
+            if (document.getElementById('dailyQuotaAmount')) {
+                document.getElementById('dailyQuotaAmount').textContent = `₦${appData.dailyQuota.toFixed(2)}`;
+            }
+            if (document.getElementById('remainingBudget')) {
+                document.getElementById('remainingBudget').textContent = `₦${appData.remainingBudget.toFixed(2)}`;
+            }
+            if (document.getElementById('totalSpent')) {
+                document.getElementById('totalSpent').textContent = `₦${appData.totalSpentToday.toFixed(2)}`;
+            }
             
             updateSpendingLog();
         }
 
         function updateSpendingLog() {
             const logEl = document.getElementById('spendingLog');
+            if (!logEl) return;
             
             if (appData.dailySpending.length === 0) {
                 logEl.innerHTML = '<p style="text-align: center; color: var(--light-charcoal); font-size: 0.9rem;">No spending logged today</p>';
@@ -1263,61 +1681,15 @@
             logEl.innerHTML = entriesHtml;
         }
 
-        // Event listeners
-        document.getElementById('monthlyIncome').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                updateAllocation();
-            }
-        });
-
-        document.getElementById('monthlyUtilities').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                updateAllocation();
-            }
-        });
-
-        document.getElementById('spendingAmount').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                processTransaction();
-            }
-        });
-
-        // Format currency inputs
-        function formatCurrencyInput(input) {
-            input.addEventListener('input', function(e) {
-                let value = e.target.value;
-                value = value.replace(/[^0-9.]/g, '');
-                const parts = value.split('.');
-                if (parts.length > 2) {
-                    value = parts[0] + '.' + parts.slice(1).join('');
-                }
-                if (parts[1] && parts[1].length > 2) {
-                    value = parts[0] + '.' + parts[1].substring(0, 2);
-                }
-                e.target.value = value;
-            });
-        }
-
-        formatCurrencyInput(document.getElementById('monthlyIncome'));
-        formatCurrencyInput(document.getElementById('monthlyUtilities'));
-        formatCurrencyInput(document.getElementById('spendingAmount'));
-
-        // Close modal when clicking outside
-        document.getElementById('confirmModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                cancelTransaction();
-            }
-        });
-
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
             notification.style.cssText = `
                 position: fixed;
-                bottom: 20px;
+                bottom: 100px;
                 right: 20px;
-                background: ${type === 'success' ? 'var(--success-green)' : type === 'warning' ? '#ff9800' : 'var(--primary-blue)'};
+                background: ${type === 'success' ? 'var(--success-green)' : type === 'warning' ? '#ff9800' : type === 'error' ? 'var(--warning-red)' : 'var(--forest-green)'};
                 color: white;
                 padding: 12px 20px;
                 border-radius: 8px;
@@ -1327,6 +1699,7 @@
                 transform: translateY(100px);
                 opacity: 0;
                 transition: all 0.3s ease;
+                max-width: 300px;
             `;
             
             document.body.appendChild(notification);
@@ -1360,18 +1733,197 @@
             setTimeout(() => {
                 button.innerHTML = originalText;
                 button.style.backgroundColor = '';
+                lucide.createIcons();
             }, 2000);
         }
 
-        // Initialize the app
+        // AI Chat Functionality
+        function initializeAI() {
+            const toggleButton = document.getElementById('ai-toggle-button');
+            const chatPopup = document.getElementById('ai-chat-popup');
+            const closeButton = document.getElementById('chat-close-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('chat-send-btn');
+            const pdfInput = document.getElementById('pdf-file-input');
+            const uploadArea = document.querySelector('.pdf-upload-area');
+
+            toggleButton.addEventListener('click', () => {
+                chatPopup.classList.toggle('open');
+            });
+
+            closeButton.addEventListener('click', () => {
+                chatPopup.classList.remove('open');
+            });
+            
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            sendButton.addEventListener('click', sendMessage);
+
+            // PDF Upload functionality
+            pdfInput.addEventListener('change', handlePDFUpload);
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type === 'application/pdf') {
+                    handlePDFFile(files[0]);
+                }
+            });
+
+            function handlePDFUpload(e) {
+                const file = e.target.files[0];
+                if (file && file.type === 'application/pdf') {
+                    handlePDFFile(file);
+                }
+            }
+
+            function handlePDFFile(file) {
+                addMessageToChat(`📄 Uploaded: ${file.name}`, 'user');
+                addMessageToChat('🔥 Analyzing your financial chaos... This might sting.', 'ai');
+                
+                // Simulate PDF processing and analysis
+                setTimeout(() => {
+                    const mockAnalysis = generateMockAnalysis();
+                    addMessageToChat(mockAnalysis, 'ai');
+                }, 2000);
+            }
+
+            function generateMockAnalysis() {
+                const roasts = [
+                    "🔥 The Roast:\n\n• You're tipping DoorDash like it's your retirement fund — cut that in half, save ₦144,000/year.\n\n• Three ghost subscriptions are squatting in your wallet; evict them, reclaim ₦57,600/year.\n\n• Nightlife is eating 20% of your income; you could've bought Tesla stock, but instead you bought tequila.\n\n• Your 'Other' category is a black hole of regret. Name it or tame it.\n\n• Groceries vs. delivery ratio says you know your oven only as 'extra storage.'\n\n💡 Action Plan:\nKill subs, cap delivery, re-route nightlife budget into investments.\nDo this = ₦384,000/year unlocked.\n\n🎤 Mic Drop:\n'You don't need a raise. You need an intervention.'"
+                ];
+                
+                return roasts[Math.floor(Math.random() * roasts.length)];
+            }
+
+            function addMessageToChat(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message', sender);
+                messageDiv.style.whiteSpace = 'pre-line';
+                messageDiv.textContent = text;
+                chatWindow.appendChild(messageDiv);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+
+            function showTypingIndicator() {
+                const indicator = document.createElement('div');
+                indicator.classList.add('chat-message', 'ai', 'typing-indicator');
+                indicator.innerHTML = `
+                    <span>Analyzing your financial sins</span>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                `;
+                chatWindow.appendChild(indicator);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                return indicator;
+            }
+
+            function removeTypingIndicator(indicator) {
+                if (indicator && indicator.parentNode) {
+                    chatWindow.removeChild(indicator);
+                }
+            }
+
+            async function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                addMessageToChat(message, 'user');
+                chatInput.value = '';
+                
+                const indicator = showTypingIndicator();
+
+                // Simulate AI response with Money Therapist personality
+                setTimeout(() => {
+                    removeTypingIndicator(indicator);
+                    
+                    const responses = [
+                        "🔥 Upload your bank statement PDF first. I can't roast what I can't see. Your spending habits are hiding behind that upload button.",
+                        "💰 Without your transaction data, I'm just another chatbot. Upload that PDF and let me show you where your money is bleeding out.",
+                        "🎯 Ready for the truth? Upload your bank statement and I'll tell you exactly which financial habits are sabotaging your wealth.",
+                        "📊 I need your spending data to deliver the surgical precision roast you deserve. PDF upload = financial intervention begins."
+                    ];
+                    
+                    const response = responses[Math.floor(Math.random() * responses.length)];
+                    addMessageToChat(response, 'ai');
+                }, 1500);
+            }
+        }
+
+        // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
             loadData();
             
             setupPercentageListeners();
             
-            document.getElementById('monthlyIncome').addEventListener('input', updateAllocationAmounts);
-            document.getElementById('monthlyUtilities').addEventListener('input', updateAllocationAmounts);
+            const monthlyIncomeInput = document.getElementById('monthlyIncome');
+            const monthlyUtilitiesInput = document.getElementById('monthlyUtilities');
+            const spendingAmountInput = document.getElementById('spendingAmount');
+            
+            if (monthlyIncomeInput) {
+                monthlyIncomeInput.addEventListener('input', updateAllocationAmounts);
+                monthlyIncomeInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        updateAllocation();
+                    }
+                });
+            }
+            
+            if (monthlyUtilitiesInput) {
+                monthlyUtilitiesInput.addEventListener('input', updateAllocationAmounts);
+                monthlyUtilitiesInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        updateAllocation();
+                    }
+                });
+            }
+            
+            if (spendingAmountInput) {
+                spendingAmountInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        processTransaction();
+                    }
+                });
+            }
+            
+            // Format currency inputs
+            function formatCurrencyInput(input) {
+                if (!input) return;
+                input.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    value = value.replace(/[^0-9.]/g, '');
+                    const parts = value.split('.');
+                    if (parts.length > 2) {
+                        value = parts[0] + '.' + parts.slice(1).join('');
+                    }
+                    if (parts[1] && parts[1].length > 2) {
+                        value = parts[0] + '.' + parts[1].substring(0, 2);
+                    }
+                    e.target.value = value;
+                });
+            }
+
+            formatCurrencyInput(monthlyIncomeInput);
+            formatCurrencyInput(monthlyUtilitiesInput);
+            formatCurrencyInput(spendingAmountInput);
             
             if (appData.monthlyIncome > 0) {
                 showDailyScreen();
@@ -1379,50 +1931,6 @@
         });
 
         window.addEventListener('load', initApp);
-
-        function setupPercentageSliders() {
-            const savingsSlider = document.getElementById('savingsPercent');
-            const spendingSlider = document.getElementById('spendingPercent');
-            
-            savingsSlider.addEventListener('input', function() {
-                const savingsValue = parseInt(this.value);
-                const spendingValue = 100 - savingsValue;
-                spendingSlider.value = spendingValue;
-                document.getElementById('savingsPercentDisplay').textContent = savingsValue + '%';
-                document.getElementById('spendingPercentDisplay').textContent = spendingValue + '%';
-                appData.savingsPercent = savingsValue;
-                appData.spendingPercent = spendingValue;
-                updateAllocation();
-            });
-            
-            spendingSlider.addEventListener('input', function() {
-                const spendingValue = parseInt(this.value);
-                const savingsValue = 100 - spendingValue;
-                savingsSlider.value = savingsValue;
-                document.getElementById('savingsPercentDisplay').textContent = savingsValue + '%';
-                document.getElementById('spendingPercentDisplay').textContent = spendingValue + '%';
-                appData.savingsPercent = savingsValue;
-                appData.spendingPercent = spendingValue;
-                updateAllocation();
-            });
-        }
-
-        function showConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-
-        function cancelTransaction() {
-            document.getElementById('confirmModal').style.display = 'none';
-            appData.pendingTransaction = null;
-        }
-
-        function confirmTransaction() {
-            if (appData.pendingTransaction) {
-                executeTransaction(appData.pendingTransaction.amount, appData.pendingTransaction.category);
-                appData.pendingTransaction = null;
-            }
-            document.getElementById('confirmModal').style.display = 'none';
-        }
     </script>
 </body>
 </html>
